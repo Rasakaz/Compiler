@@ -1,18 +1,16 @@
 func foo(x:real) return int {
 	var a: int;
 	a = 23;
-	if(a == 23)
+	if(4 == 23)
 		a = 10;
 	else
 		a = 19;
-	return x + a;
+	return  5;
 }
 
 proc Main() {
-	var a, b:int;
-	a = 0;
-	while(a < 0){
-		b = foo(3.14);
-		a = a + b;
+	var a:int;
+	while(7 < 0){
+
 	}
 }

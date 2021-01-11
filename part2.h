@@ -82,3 +82,4 @@ void operatorisHere(char *type);
 void checkCondition();
 void logiaclOperator(char *type);
 char* getVarTypeByName(char *name);
+void printAllCode();

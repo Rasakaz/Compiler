@@ -27,9 +27,9 @@
 %token COLONS COMMA ENDLINE 
 
 %%
-project:  pushEndSign program {/*checkMain();checkFuncProcName();printErrors();*/};
+project:  pushEndSign program {checkMain();checkFuncProcName();printAllCode();};
 
-pushEndSign: {pushEndSign("$$");};
+pushEndSign: {pushEndSign("$$");openFile();};
 
 program: procedures {($$ = mknode("CODE", $1, NULL));};
 
@@ -117,6 +117,7 @@ statment:
 	}
 	| WHILE {printIfCond("while");} OLIST stmnt_expression {printCond();} CLIST statment_block
 	{
+		printWhile();
 		checkCondition();
 		
 	}
@@ -133,7 +134,7 @@ block: OBLOCK  declarations statements return_statement CBLOCK
 		$$ = mknode("{", $3, mknode("", $4, mknode("", $5, mknode("}", NULL, NULL))));
 	};
 
-return_statement: RETURN ret_expression ENDLINE  {$$ = mknode("RET", $2, NULL);} | {$$ = NULL;};
+return_statement: RETURN ret_expression ENDLINE  {$$ = mknode("RET", $2, NULL);printReturn();} | {$$ = NULL;};
 
 ret_types: BOOLT {$$ = mknode("BOOLEAN", NULL, NULL);addReturnType("BOOLEAN");}
 	| CHART {$$ = mknode("CHAR", NULL, NULL);addReturnType("CHAR");}
@@ -191,22 +192,22 @@ str_expression: OLIST str_expression CLIST {$$ = mknode("(", $2, mknode(")", NUL
 
 ret_expression: OLIST ret_expression CLIST {$$ = mknode("(", $2, mknode(")", NULL, NULL));}
 	//Logical operators
-	| ret_expression AND ret_expression {$$ = mknode("&&", $1, $3);} 
-	| ret_expression OR ret_expression {$$ = mknode("||", $1, $3);}
-	| NOT ret_expression {$$ = mknode("!", $2, NULL);}
+	| ret_expression AND ret_expression {$$ = mknode("&&", $1, $3);setRight("&&");} 
+	| ret_expression OR ret_expression {$$ = mknode("||", $1, $3);setRight("||");}
+	| NOT ret_expression {$$ = mknode("!", $2, NULL);setRight("!");}
 	//Comparison operators
-	| ret_expression COMPARE ret_expression {$$ = mknode("==", $1, $3);}
-	| ret_expression NOTEQUAL ret_expression {$$ = mknode("!=", $1, $3);}
-	| ret_expression GREATER ret_expression {$$ = mknode(">", $1, $3);}
-	| ret_expression LESS ret_expression {$$ = mknode("<", $1, $3);}
-	| ret_expression GREATEREQUAL ret_expression {$$ = mknode(">=", $1, $3);}
-	| ret_expression LESSEQUAL ret_expression {$$ = mknode("<=", $1, $3);}
+	| ret_expression COMPARE ret_expression {$$ = mknode("==", $1, $3);setRight("==");}
+	| ret_expression NOTEQUAL ret_expression {$$ = mknode("!=", $1, $3);setRight("!=");}
+	| ret_expression GREATER ret_expression {$$ = mknode(">", $1, $3);setRight(">");}
+	| ret_expression LESS ret_expression {$$ = mknode("<", $1, $3);setRight("<");}
+	| ret_expression GREATEREQUAL ret_expression {$$ = mknode(">=", $1, $3);setRight(">=");}
+	| ret_expression LESSEQUAL ret_expression {$$ = mknode("<=", $1, $3);setRight("<=");}
 	//Arithmetic operatos
-	| ret_expression PLUS ret_expression {$$ = mknode("+", $1, $3);}
-	| ret_expression MINUS ret_expression {$$ = mknode("-", $1, $3);}
-	| ret_expression MULTIPLY ret_expression {$$ = mknode("*", $1, $3);}
-	| ret_expression DIVIDE ret_expression {$$ = mknode("/", $1, $3);}
-	| ret_expression ABSOLUTE ret_expression 
+	| ret_expression PLUS ret_expression {$$ = mknode("+", $1, $3);setRight("+");}
+	| ret_expression MINUS ret_expression {$$ = mknode("-", $1, $3);setRight("-");}
+	| ret_expression MULTIPLY ret_expression {$$ = mknode("*", $1, $3);setRight("*");}
+	| ret_expression DIVIDE ret_expression {$$ = mknode("/", $1, $3);setRight("/");}
+	| ABSOLUTE {setRight("|");} ret_expression {setRight("|");} ABSOLUTE
 	{
 		$$ = mknode("|", mknode($2, NULL, NULL), mknode("|", NULL, NULL));
 	}
@@ -219,13 +220,13 @@ ret_expression: OLIST ret_expression CLIST {$$ = mknode("(", $2, mknode(")", NUL
 		$$ = mknode($1, mknode("[", $3, mknode("]", NULL, NULL)), NULL);
 	}
 	//variables, Constants and NULL 
-	| INTEGER {$$ = mknode($1, NULL, NULL); checkReturn("INTEGER");}
-	| REAL {$$ = mknode($1, NULL, NULL); checkReturn("REAL");}
-	| CHAR {$$ = mknode($1, NULL, NULL); checkReturn("CHAR");}
-	| STRING {$$ = mknode($1, NULL, NULL); checkReturn("STRING");}
-	| BOOLEANTRUE {$$ = mknode($1, NULL, NULL); checkReturn("BOOLEAN");}
-	| BOOLEANFALSE {$$ = mknode($1, NULL, NULL); checkReturn("BOOLEAN");}
-	| IDENTIFIER {$$ = mknode($1, NULL, NULL); checkReturn($1);}
+	| INTEGER {$$ = mknode($1, NULL, NULL); checkReturn("INTEGER");setRight($1);}
+	| REAL {$$ = mknode($1, NULL, NULL); checkReturn("REAL");setRight($1);}
+	| CHAR {$$ = mknode($1, NULL, NULL); checkReturn("CHAR");setRight($1);}
+	| STRING {$$ = mknode($1, NULL, NULL); checkReturn("STRING");setRight($1);}
+	| BOOLEANTRUE {$$ = mknode($1, NULL, NULL); checkReturn("BOOLEAN");setRight("1");}
+	| BOOLEANFALSE {$$ = mknode($1, NULL, NULL); checkReturn("BOOLEAN");setRight("0");}
+	| IDENTIFIER {$$ = mknode($1, NULL, NULL); checkReturn($1);setRight($1);}
 	| NULLL {$$ = mknode("NULL", NULL, NULL);};
 
 stmnt_expression:

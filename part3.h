@@ -23,3 +23,6 @@ void printFuncName(char *name);
 void printParam();
 void printL();
 void printGoTo();
+void printReturn();
+void printWhile();
+void openFile();

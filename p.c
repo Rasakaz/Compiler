@@ -7,6 +7,7 @@
 #include "part2.h"
 
 /*Functions Declarations*/
+void printAllCode();
 void addOperator(char *op);
 void checkLeftRight();
 void addRightVar(char *type, char *name);
@@ -62,10 +63,22 @@ char *lhsVarType;
 char *rightVar;
 char *operator;
 
-void commen(){
-	// printf("COMMENT\n");
+void printAllCode(){
+	FILE *f = fopen("code.txt" , "r");
+	char c = fgetc(f);
+	while(c != EOF){
+		printf("%c", c);
+		c = fgetc(f);
+	}
+	// if(errorSize == 0){
+	// 	FILE *f = fopen("code.txt" , "r");
+	// 	char c = fgetc(f);
+	// 	while(c != EOF){
+	// 		printf("%c", c);
+	// 		c = fgetc(f);
+	// 	}
+	// }
 }
-
 /*check if the right and left sides of the asssignment are legal*/
 void checkLeftRight(){
 	if(operator){
@@ -651,6 +664,9 @@ void pushNewScope(char *name){
 
 /*push end sign to the stack*/
 void pushEndSign(char *sign){
+	// if(remove("code.txt") == 0){
+	// 	printf("file delete\n");
+	// }
 	scope *endSign = (scope*)malloc(sizeof(scope));
 	endSign->name = (char*)malloc(sizeof(sign) + 1);
 	strcpy(endSign->name, sign);

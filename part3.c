@@ -14,19 +14,101 @@ char **right;
 int ri = 0;
 char *left;
 int Li = 0;
-char Lelements[100][100];
+int **Lelments;
+int l_Index = 0;
 bool absFlag = false;
+bool goToFlag = false;
+char *Code = "";
+FILE *f;
+
+void openFile(){
+	f = fopen("code.txt", "w");
+	fclose(f);
+}
+
+void printWhile(){
+	if(l_Index > 0){
+		f = fopen("code.txt", "a");
+		if(f){
+			fprintf(f, "\tgoto L%d\n", Lelments[l_Index - 1]);
+			fprintf(f, "  L%d:", Li);
+			fclose(f);
+		}
+		// printf("\tgoto L%d\n", Lelments[l_Index - 1]);
+		// printf("  L%d:", Li);
+		
+
+		// char temp[100];
+		// sprintf(temp, "\tgoto L%d\n", Lelments[l_Index - 1]);	
+		// concat(Code, temp);
+		// memcpy(Code, temp, strlen(temp) )
+		// sprintf(temp, "  L%d:", Li);
+		// concat(Code, temp);
+		// printf("PRINT CODE: %s", Code);
+	}
+}
+
+void printReturn(){
+	f = fopen("code.txt", "a");
+	if(Li > 0){
+		// printf("  L%d:", Li);
+		fprintf(f, "  L%d:", Li);
+	}
+	fprintf(f, "\tt%d = ", t_index);
+	// printf("\tt%d = ", t_index);
+	for(int i = 0, j = ri - 1; i <= j; i++, j--){
+		if(i == j ){
+			// printf("%s ", right[i]);
+			fprintf(f, "%s ", right[i]);
+		} else {
+			// printf("%s ", right[i]);
+			// printf("%s ", right[j]);
+
+			fprintf(f, "%s ", right[i]);
+			fprintf(f, "%s ", right[j]);
+		}	
+	}
+	//printf("\n");
+	// printf("\tReturn t%d\n", t_index++);
+	
+	fprintf(f, "\n");
+	fprintf(f, "\tReturn t%d\n", t_index++);
+	if(right){
+		for(int i = 0; i < ri; i++){
+			if(right[i]){
+				// printf("%s\n", right[i]);
+				// printf("END\n");
+				free(right[i]);
+				right[i] = NULL;
+			}
+		}
+		ri = 0;
+		free(right);
+	}
+	fclose(f);
+}
 
 void printGoTo(){
+	f = fopen("code.txt", "a");
 	Li++;
-	printf("\tGoto L%d\n", Li);
+	// printf("\tGoto L%d\n", Li);
+	// printf("  L%d:", Li - 1);
+
+	fprintf(f, "\tGoto L%d\n", Li);
+	fprintf(f, "  L%d:", Li - 1);
+	fclose(f);
 }
 
 void printCallFunc(char *name){
+	f = fopen("code.txt", "a");
 	// printf("function call name\n");
-	printf("\tt%d = LCall %s\n", t_index, strtok(name, "("));
-	printf("\tPopParams \n");
-	printf("\t%s = t%d\n", left, t_index++);
+	fprintf(f, "\tt%d = LCall %s\n", t_index, strtok(name, "("));
+	fprintf(f, "\tPopParams \n");
+	fprintf(f, "\t%s = t%d\n", left, t_index++);
+
+	// printf("\tt%d = LCall %s\n", t_index, strtok(name, "("));
+	// printf("\tPopParams \n");
+	// printf("\t%s = t%d\n", left, t_index++);
 	if(left){
 		free(left);
 	}
@@ -42,10 +124,11 @@ void printCallFunc(char *name){
 		ri = 0;
 		free(right);
 	}
+	fclose(f);
 }
 
 void printL(){
-	printf("  L%d:", Li);
+	// printf("  L%d:", Li);
 }
 
 // void printFunc(){
@@ -55,18 +138,21 @@ void printL(){
 void printCond()
 {
 	// printf("print cond\n");
-	// printf("printf:\t");
 	// for(int i = 0; i < ri; i++){
 	// 	printf("%s \n", right[i]);
 	// }
 	// printf("\n");
-
+	f = fopen("code.txt", "a");
 	for(int i = 0, j = ri - 1; i <= j; i++, j--){
-		if(i == j ){
-			printf("%s ", right[i]);
+		if(i == j){
+			fprintf(f, "%s ", right[i]);
+			// printf("%s ", right[i]);
 		} else {
-			printf("%s ", right[i]);
-			printf("%s ", right[j]);
+			fprintf(f, "%s ", right[i]);
+			fprintf(f, "%s ", right[j]);
+
+			// printf("%s ", right[i]);
+			// printf("%s ", right[j]);
 		}	
 	}
 
@@ -77,9 +163,12 @@ void printCond()
 
 
 	Li++;
-	printf("Goto L%d\n",Li);
+	fprintf(f,"Goto L%d\n",Li);
+
+	// printf("Goto L%d\n",Li);
 	Li++;
-	printf("\tGoto L%d\n",Li);
+	fprintf(f, "\tGoto L%d\n",Li);
+	// printf("\tGoto L%d\n",Li);
 	if(right){
 		for(int i = 0; i < ri; i++){
 			if(right[i]){
@@ -92,25 +181,55 @@ void printCond()
 		ri = 0;
 		free(right);
 	}
-	printf("  L%d:", Li - 1);
+	fprintf(f, "  L%d:", Li - 1);
+	// printf("  L%d:", Li - 1);
+	fclose(f);
 }
 
 
 void printIfCond(char *cond)
 {
-	printf("\t%s ",cond);
+	f = fopen("code.txt", "a");
+	if(Li > 0 || strcmp(cond, "while") == 0){
+			fprintf(f, "  L%d:", Li);
+			// printf("  L%d:", Li);
+	}
+	if(strcmp(cond, "while") == 0){
+		// printf("WHILE\n");
+		l_Index++;
+		if(l_Index - 1 > 0){
+			Lelments = (int**)realloc(Lelments, l_Index);
+		} else {
+			Lelments = (int**)malloc(sizeof(int*));
+		}
+		// printf("33\n");
+		Lelments[l_Index - 1] = Li;
+		// printf("44\n");
+	}
+	// printf("cond: %s\n", cond);
+	fprintf(f, "\tif ");
+	// printf("\tif ");
+	fclose(f);
 }
 
 void endFunc(){
-	printf("\tendFunc\n");
-	Li = 0;
+	f = fopen("code.txt", "a");
+
+	fprintf(f, "\tendFunc\n");
+	// printf("\tendFunc\n");
+	// Li = 0;
 	t_index = 0;
+	fclose(f);
 }
 
 void printFuncName(char *name){
-	printf("%s:\n", name);
-	printf("\tBeginFunc\n");
+	f = fopen("code.txt", "a");
 
+	fprintf(f, "%s:\n", name);
+	fprintf(f, "\tBeginFunc\n");
+	// printf("%s:\n", name);
+	// printf("\tBeginFunc\n");
+	fclose(f);
 }
 
 void function(){
@@ -123,11 +242,15 @@ void printParam(){
 	// if(strlen(p) > 1){
 	// 	p[strlen(p) - 1] = '\0';
 	// }
-	char *c = "";
+	// char *c = "";
+	f = fopen("code.txt", "a");
 	// printf("ri = %d\n", ri);
 	for(int i = 0; i < ri; i++){
-		printf("\tt%d = %s\n", t_index, right[i]);
-		printf("\tPushParam t%d\n", t_index++);
+		fprintf(f, "\tt%d = %s\n", t_index, right[i]);
+		fprintf(f, "\tPushParam t%d\n", t_index++);
+		
+		// printf("\tt%d = %s\n", t_index, right[i]);
+		// printf("\tPushParam t%d\n", t_index++);
 		// printf("!!!!!!!!!!!!!!!\n");
 		// if(!strpbrk(right[i], ",")){
 		// 	if(!strpbrk(right[i], ")")) {
@@ -143,6 +266,7 @@ void printParam(){
 		// 	c = "";
 		// }
 	}
+	fclose(f);
 	// printf("param p is: %s\n",p);
 	// printf("function function: %s\n", functionName);
 }
@@ -155,26 +279,33 @@ void printCode(){
 	// }
 	// printf("\n");
 	// printf("print CODE\n");
-
-	printf("\tt%d = ", t_index);
+	f = fopen("code.txt", "a");
+	fprintf(f, "\tt%d = ", t_index);
+	// printf("\tt%d = ", t_index);
 	if(absFlag){
 		for(int i = 0; i < ri; i++){
-			printf("%s", right[i]);
+			
+			fprintf(f, "%s", right[i]);
+			// printf("%s", right[i]);
 
 		}
 		absFlag = false;
 	} else {
 		for(int i = 0; i <= (ri)/2; i++){
 			if(i  >= ri / 2){
-				printf("%s", right[i]);
+				fprintf(f, "%s", right[i]);
+				// printf("%s", right[i]);
 			} else {
-				printf("%s", right[i]);
-				printf("%s", right[ri - 1 - i]);
+				fprintf(f, "%s", right[i]);
+				fprintf(f, "%s", right[ri - 1 - i]);
+				// printf("%s", right[i]);
+				// printf("%s", right[ri - 1 - i]);
 			}
 		}
 	}
 
-	printf("\n\t%s = t%d\n", left, t_index++);
+	fprintf(f, "\n\t%s = t%d\n", left, t_index++);
+	// printf("\n\t%s = t%d\n", left, t_index++);
 	if(left){
 		free(left);
 	}
@@ -188,6 +319,7 @@ void printCode(){
 		ri = 0;
 		free(right);
 	}
+	fclose(f);
 }
 
 
@@ -203,6 +335,7 @@ char *concat(char *st1, char *st2){
 		j++;
 	}
 	s[i] = '\0';
+	printf("CONCAT: %s\n", s);
 	return s;
 }
 
@@ -228,6 +361,30 @@ void setRight(char *r){
 	}
 	if(strtok(t, ">")){
 		t = strtok(t, ">");
+	}
+	if(strtok(t, "||")){
+		t = strtok(t, "||");
+	}
+	if(strtok(t, "&&")){
+		t = strtok(t, "&&");
+	}
+	if(strtok(t, "!")){
+		t = strtok(t, "!");
+	}	
+	if(strtok(t, "==")){
+		t = strtok(t, "==");
+	}
+	if(strtok(t, "*")){
+		t = strtok(t, "*");
+	}	
+	if(strtok(t, "/")){
+		t = strtok(t, "/");
+	}	
+	if(strtok(t, "+")){
+		t = strtok(t, "+");
+	}
+	if(strtok(t, "-")){
+		t = strtok(t, "-");
 	}
 	if(strtok(t, "<")){
 		t = strtok(t, "<");
