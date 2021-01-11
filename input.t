@@ -1,16 +1,20 @@
-func foo(x:real) return int {
-	var a: int;
-	a = 23;
-	if(4 == 23)
-		a = 10;
-	else
-		a = 19;
-	return  5;
+func  A1( m: int) return int
+{
+     var n: int;
+     n = 10;
+     if (m == 11)
+            n = 12;
+     else
+            n = 13;
+     return  m + n;
 }
 
-proc Main() {
-	var a:int;
-	while(7 < 0){
-
-	}
+proc  Main( )
+{
+      var  x, y: int;
+      x = 0;
+      while(x < 14)  {
+           y = A1(15);
+           x = x + y;
+      }
 }

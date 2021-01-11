@@ -1,20 +1,29 @@
-foo:
+A1:
 	BeginFunc
-	t0 = 23
-	a = t0
-	if 4  == 23 Goto L1
+	t0 = 10
+	n = t0
+	if m == 11 Goto L1
 	Goto L2
-  L1:	t1 = 10
-	a = t1
+  L1:	t1 = 12
+	n = t1
 	Goto L3
-  L2:	t2 = 19
-	a = t2
-  L3:	t3 = 5 
+  L2:	t2 = 13
+	n = t2
+  L3:	t3 = m + n 
 	Return t3
 	endFunc
 Main:
 	BeginFunc
-  L3:	if 7  < 0 Goto L4
+	t0 = 0
+	x = t0
+  L3:	if x < 14 Goto L4
 	Goto L5
-  L4:	goto L3
+  L4:	t1 = 15
+	PushParam t1
+	t2 = LCall A1
+	PopParams 
+	y = t2
+	t3 = x+y
+	x = t3
+	goto L3
   L5:	endFunc
